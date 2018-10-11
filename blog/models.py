@@ -1,8 +1,5 @@
 from django.db import models
 from django.utils import timezone
-from django.shortcuts import render
-from django.utils import timezone
-
 
 class Publicacion(models.Model):
         autor = models.ForeignKey('auth.User', on_delete=models.CASCADE)
@@ -14,7 +11,7 @@ class Publicacion(models.Model):
                 blank=True, null=True)
 
         def publicar(self):
-            self.published_date = timezone.now()
+            self.fecha_publicacion = timezone.now()
             self.save()
 
         def __str__(self):
