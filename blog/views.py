@@ -9,8 +9,8 @@ def post_list(request):
     return render(request, 'blog/post_list.html', {'publicaciones': publicaciones})
 
 def post_detail(request, pk):
-    publicaciones = get_object_or_404(Publicacion, pk=pk)
-    return render(request, 'blog/post_detail.html', {'publicaciones': publicaciones})
+    publicacion = get_object_or_404(Publicacion, pk=pk)
+    return render(request, 'blog/post_detail.html', {'publicacion': publicacion})
 
 def post_new(request):
     if request.method == "POST":
@@ -18,7 +18,6 @@ def post_new(request):
         if form.is_valid():
             publicacion = form.save(commit=False)
             publicacion.autor = request.user
-            publicacion.fecha_publicacion = timezone.now()
             publicacion.save()
             return redirect('blog.views.post_detail', pk=publicacion.pk)
     else:
@@ -32,9 +31,22 @@ def post_edit(request, pk):
         if form.is_valid():
             publicacion = form.save(commit=False)
             publicacion.autor = request.user
-            publicacion.fecha_publicacion = timezone.now()
             publicacion.save()
-            return redirect('blog.views.post_detail', pk=publicacion.pk)
+            return redirect('post_detail', pk=publicacion.pk)
     else:
         form = PublicacionForm(instance=publicacion)
     return render(request, 'blog/post_edit.html', {'form': form})
+
+def post_draft_list(request):
+    publicaciones = Publicacion.objects.filter(fecha_publicacion__isnull=True).order_by('fecha_creacion')
+    return render(request, 'blog/post_draft_list.html', {'publicaciones': publicaciones})
+
+def post_publish(request, pk):
+    publicacion = get_object_or_404(Publicacion, pk=pk)
+    publicacion.publicar()
+    return redirect('post_detail', pk=pk)
+
+def post_remove(request, pk):
+    publicacion = get_object_or_404(Publicacion, pk=pk)
+    publicacion.delete()
+    return redirect('post_list')
